@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipt Management</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        h2 {
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+
+        form {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 6px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 8px 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Receipt Generator - API Console</h1>
+
+<!-- Create Receipt -->
+<h2>Create Receipt</h2>
+<form id="createReceiptForm">
+    <label>Owner Name:</label>
+    <input id="ownerName" required>
+
+    <label>Tenant Name:</label>
+    <input id="tenantName">
+
+    <label>Bill No:</label>
+    <input id="billNo" required>
+
+    <label>Receipt No:</label>
+    <input id="receiptNo" required>
+
+    <label>Receipt Date:</label>
+    <input id="receiptDate" type="date" required>
+
+    <label>Amount:</label>
+    <input id="amount" type="number" step="0.01" required>
+
+    <label>Payment Method:</label>
+    <input id="paymentMethod" value="CHEQUE">
+
+    <label>Transaction ID:</label>
+    <input id="transactionId">
+
+    <label>Tower No:</label>
+    <input id="towerNo">
+
+    <label>Flat No:</label>
+    <input id="flatNo">
+
+    <label>Bill Period:</label>
+    <input id="billPeriod">
+
+    <label>Description:</label>
+    <textarea id="description"></textarea>
+
+    <label>Apartment Name:</label>
+    <input id="apartmentName" value="IRA GALAXY APARTMENT">
+
+    <label>Email:</label>
+    <input id="email" type="email">
+
+    <button type="submit">Create Receipt</button>
+</form>
+<div class="table-wrapper">
+    <table id="createReceiptResult"></table>
+</div>
+
+<!-- 1. Get Receipts by Owner Name with Fetch -->
+<h2>Get Receipts by Owner Name</h2>
+<form id="ownerForm">
+    <label>Owner Name:</label>
+    <input id="ownerInput" name="ownerName" required>
+    <button type="submit">Search</button>
+</form>
+<div class="table-wrapper">
+    <table id="ownerResultsTable"></table>
+</div>
+
+<!-- 2. Get Receipts by Email -->
+<h2>Get Receipts by Email</h2>
+<form id="emailForm">
+    <label>Email:</label>
+    <input id="emailInput" name="email" type="email" required>
+    <button type="submit">Search</button>
+</form>
+<div class="table-wrapper">
+    <table id="emailResultsTable"></table>
+</div>
+
+<!-- 3. Get All Receipts -->
+<h2>Get All Receipts</h2>
+<form id="allForm">
+    <button type="submit">Fetch All</button>
+</form>
+<div class="table-wrapper">
+    <table id="allResultsTable"></table>
+</div>
+
+<!-- 4. Get by Date Range -->
+<h2>Get Receipts by Date Range</h2>
+<form id="dateRangeForm">
+    <label>Start Date:</label>
+    <input id="startDateInput" type="date" required>
+    <label>End Date:</label>
+    <input id="endDateInput" type="date" required>
+    <button type="submit">Search</button>
+</form>
+<div class="table-wrapper">
+    <table id="dateRangeResultsTable"></table>
+</div>
+
+<script>
+    function buildTableFromReceipts(data, elementId) {
+    const table = document.getElementById(elementId);
+    table.innerHTML = '';
+
+    const receipts = Array.isArray(data) ? data : [data];
+    if (!receipts.length || receipts[0].error) {
+        table.innerHTML = `<tr><td colspan="100%">${receipts[0]?.error || 'No data found'}</td></tr>`;
+        return;
+    }
+
+    const headers = Object.keys(receipts[0]);
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    // Add Action column headers
+    const actionTh = document.createElement('th');
+    actionTh.textContent = 'Download';
+    headerRow.appendChild(actionTh);
+    const emailTh = document.createElement('th');
+    emailTh.textContent = 'Send Email';
+    headerRow.appendChild(emailTh);
+
+    headers.forEach(key => {
+        const th = document.createElement('th');
+        th.textContent = key;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    const tbody = document.createElement('tbody');
+    receipts.forEach(receipt => {
+        const row = document.createElement('tr');
+
+        // Download PDF button
+        const downloadTd = document.createElement('td');
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = 'PDF';
+        downloadBtn.onclick = () => {
+            const url = `/api/receipts/${receipt.id}/pdf`;
+            fetch(url)
+                .then(res => res.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `receipt-${receipt.id}.pdf`;
+                    link.click();
+                });
+        };
+        downloadTd.appendChild(downloadBtn);
+        row.appendChild(downloadTd);
+
+        // Resend Email button
+        const emailTd = document.createElement('td');
+        const emailBtn = document.createElement('button');
+        emailBtn.textContent = 'Email';
+        emailBtn.onclick = () => {
+            fetch(`/api/receipts/${receipt.id}/resend-email`, {
+                method: 'POST'
+            }).then(() => alert('Email sent'))
+              .catch(() => alert('Failed to send email'));
+        };
+        emailTd.appendChild(emailBtn);
+        row.appendChild(emailTd);
+
+        headers.forEach(key => {
+            const td = document.createElement('td');
+            td.textContent = receipt[key] ?? '';
+            row.appendChild(td);
+        });
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+}
+
+    function fetchAndDisplayTable(url, tableId) {
+        fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then(data => buildTableFromReceipts(data, tableId))
+            .catch(err => buildTableFromReceipts([{ error: err.message }], tableId));
+    }
+
+    ownerForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const val = document.getElementById("ownerInput").value;
+        fetchAndDisplayTable(`/api/receipts/owner/${encodeURIComponent(val)}`, "ownerResultsTable");
+    });
+
+    emailForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const val = document.getElementById("emailInput").value;
+        fetchAndDisplayTable(`/api/receipts/email/${encodeURIComponent(val)}`, "emailResultsTable");
+    });
+
+    allForm.addEventListener("submit", e => {
+        e.preventDefault();
+        fetchAndDisplayTable(`/api/receipts`, "allResultsTable");
+    });
+
+    dateRangeForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const start = document.getElementById("startDateInput").value;
+        const end = document.getElementById("endDateInput").value;
+        fetchAndDisplayTable(`/api/receipts/date-range?startDate=${start}&endDate=${end}`, "dateRangeResultsTable");
+    });
+
+    createReceiptForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const payload = {
+            ownerName: document.getElementById("ownerName").value,
+            tenantName: document.getElementById("tenantName").value,
+            billNo: document.getElementById("billNo").value,
+            receiptNo: document.getElementById("receiptNo").value,
+            receiptDate: document.getElementById("receiptDate").value,
+            amount: parseFloat(document.getElementById("amount").value),
+            paymentMethod: document.getElementById("paymentMethod").value,
+            transactionId: document.getElementById("transactionId").value,
+            towerNo: document.getElementById("towerNo").value,
+            flatNo: document.getElementById("flatNo").value,
+            billPeriod: document.getElementById("billPeriod").value,
+            description: document.getElementById("description").value,
+            apartmentName: document.getElementById("apartmentName").value,
+            email: document.getElementById("email").value
+        };
+
+        fetch('/api/receipts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(data => buildTableFromReceipts(data, 'createReceiptResult'))
+        .catch(err => buildTableFromReceipts([{ error: err.message }], 'createReceiptResult'));
+    });
+</script>
+
+</body>
+</html>

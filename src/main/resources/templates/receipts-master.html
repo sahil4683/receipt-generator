@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipts Master</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+        }
+        input, button {
+            padding: 6px;
+        }
+        .editable {
+            background-color: #fff9c4;
+        }
+    </style>
+</head>
+<body>
+<h1>Receipts Master</h1>
+<div id="message"></div>
+<table id="receiptsTable"></table>
+
+<script>
+    function fetchReceipts() {
+        fetch('/api/receipts')
+            .then(res => res.json())
+            .then(data => renderTable(data))
+            .catch(err => {
+                document.getElementById("message").textContent = 'Error: ' + err.message;
+            });
+    }
+
+    function renderTable(receipts) {
+        const table = document.getElementById('receiptsTable');
+        table.innerHTML = '';
+        if (!receipts.length) {
+            table.innerHTML = '<tr><td colspan="100%">No data</td></tr>';
+            return;
+        }
+
+        const headers = Object.keys(receipts[0]);
+        const thead = document.createElement('thead');
+        const headRow = document.createElement('tr');
+
+        ['Actions'].forEach(h => {
+            const th = document.createElement('th');
+            th.colSpan = 4;
+            th.textContent = h;
+            headRow.appendChild(th);
+        });
+
+        headers.forEach(h => {
+            const th = document.createElement('th');
+            th.textContent = h;
+            headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        receipts.forEach(receipt => {
+            const row = document.createElement('tr');
+
+            // PDF Button
+            const pdfBtn = document.createElement('button');
+            pdfBtn.textContent = 'PDF';
+            pdfBtn.onclick = () => downloadPdf(receipt.id);
+            row.appendChild(wrapCell(pdfBtn));
+
+            // Email Button
+            const emailBtn = document.createElement('button');
+            emailBtn.textContent = 'Email';
+            emailBtn.onclick = () => resendEmail(receipt.id);
+            row.appendChild(wrapCell(emailBtn));
+
+            // Delete Button
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Delete';
+            delBtn.onclick = () => deleteReceipt(receipt.id);
+            row.appendChild(wrapCell(delBtn));
+
+            // Save Button
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.onclick = () => saveRow(row, receipt.id);
+            row.appendChild(wrapCell(saveBtn));
+
+            headers.forEach(key => {
+                const td = document.createElement('td');
+                td.contentEditable = key !== 'id';
+                if (key !== 'id') td.classList.add('editable');
+                td.dataset.key = key;
+                td.textContent = receipt[key] ?? '';
+                row.appendChild(td);
+            });
+
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+    }
+
+    function wrapCell(content) {
+        const td = document.createElement('td');
+        td.appendChild(content);
+        return td;
+    }
+
+    function downloadPdf(id) {
+        fetch(`/api/receipts/${id}/pdf`)
+            .then(res => res.blob())
+            .then(blob => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `receipt-${id}.pdf`;
+                link.click();
+            });
+    }
+
+    function resendEmail(id) {
+        fetch(`/api/receipts/${id}/resend-email`, { method: 'POST' })
+            .then(() => alert('Email sent'))
+            .catch(() => alert('Failed to send email'));
+    }
+
+    function deleteReceipt(id) {
+        if (confirm('Are you sure you want to delete this receipt?')) {
+            fetch(`/api/receipts/${id}`, { method: 'DELETE' })
+                .then(() => fetchReceipts())
+                .catch(() => alert('Delete failed'));
+        }
+    }
+
+    function saveRow(row, id) {
+        const payload = {};
+        row.querySelectorAll('td.editable').forEach(td => {
+            const key = td.dataset.key;
+            let val = td.textContent;
+            if (key === 'amount') val = parseFloat(val);
+            payload[key] = val;
+        });
+
+        fetch(`/api/receipts/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to update');
+                return res.json();
+            })
+            .then(() => fetchReceipts())
+            .catch(err => alert(err.message));
+    }
+
+    fetchReceipts();
+</script>
+</body>
+</html>

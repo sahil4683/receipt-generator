@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - Payment Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .receipt-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2ecc71;
+        }
+        .receipt-info h2 {
+            color: #2ecc71;
+            margin-top: 0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .info-value {
+            color: #333;
+        }
+        .amount-highlight {
+            background-color: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid #2ecc71;
+        }
+        .amount-highlight .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        .message {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .attachment-notice {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .attachment-notice i {
+            color: #856404;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🧾 Payment Receipt</h1>
+        <p>Thank you for your payment</p>
+    </div>
+
+    <div class="receipt-info">
+        <h2>Receipt Details</h2>
+        <div class="info-row">
+            <span class="info-label">Receipt Number:</span>
+            <span class="info-value" th:text="${receipt.receiptNo}">BR/105/25-26</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Receipt Date:</span>
+            <span class="info-value" th:text="${formattedDate}">02-Jul-2025</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Bill Number:</span>
+            <span class="info-value" th:text="${receipt.billNo}">IRA/105GAAP</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Owner Name:</span>
+            <span class="info-value" th:text="${receipt.ownerName}">C-Wing-504</span>
+        </div>
+        <div class="info-row" th:if="${receipt.tenantName != null and !receipt.tenantName.isEmpty()}">
+            <span class="info-label">Tenant Name:</span>
+            <span class="info-value" th:text="${receipt.tenantName}">-</span>
+        </div>
+        <div class="info-row" th:if="${receipt.towerNo != null and !receipt.towerNo.isEmpty()}">
+            <span class="info-label">Tower:</span>
+            <span class="info-value" th:text="${receipt.towerNo}">C-Wing</span>
+        </div>
+        <div class="info-row" th:if="${receipt.flatNo != null and !receipt.flatNo.isEmpty()}">
+            <span class="info-label">Flat Number:</span>
+            <span class="info-value" th:text="${receipt.flatNo}">504</span>
+        </div>
+    </div>
+
+    <div class="amount-highlight">
+        <div class="amount" th:text="${formattedAmount}">₹2,195.00</div>
+        <div th:text="${receipt.amountInWords}">Two Thousand One Hundred Ninety Five Rupees Only</div>
+    </div>
+
+    <div class="receipt-info">
+        <h2>Payment Details</h2>
+        <div class="info-row">
+            <span class="info-label">Payment Method:</span>
+            <span class="info-value" th:text="${receipt.paymentMethod != null ? receipt.paymentMethod : 'CHEQUE'}">CHEQUE</span>
+        </div>
+        <div class="info-row" th:if="${receipt.transactionId != null and !receipt.transactionId.isEmpty()}">
+            <span class="info-label">Transaction ID:</span>
+            <span class="info-value" th:text="${receipt.transactionId}">8a96bc8397ca1e0...</span>
+        </div>
+        <div class="info-row" th:if="${receipt.billPeriod != null and !receipt.billPeriod.isEmpty()}">
+            <span class="info-label">Bill Period:</span>
+            <span class="info-value" th:text="${receipt.billPeriod}">July 2025</span>
+        </div>
+        <div class="info-row" th:if="${receipt.description != null and !receipt.description.isEmpty()}">
+            <span class="info-label">Description:</span>
+            <span class="info-value" th:text="${receipt.description}">Maintenance Charges</span>
+        </div>
+    </div>
+
+    <div class="message">
+        <h3>📧 Important Information</h3>
+        <p>This is a system-generated receipt for your payment. Please keep this email and the attached PDF for your records.</p>
+        <p>If you have any questions regarding this receipt, please contact the management office.</p>
+    </div>
+
+    <div class="attachment-notice">
+        <h3>📎 Attachment</h3>
+        <p>Your detailed receipt is attached as a PDF file. Please download and save it for your records.</p>
+    </div>
+
+    <div class="footer">
+        <p><strong th:text="${receipt.apartmentName != null ? receipt.apartmentName : 'IRA GALAXY APARTMENT'}">IRA GALAXY APARTMENT</strong></p>
+        <p>This is an automated email. Please do not reply to this email.</p>
+        <p>Generated on <span th:text="${#temporals.format(#temporals.createNow(), 'dd-MMM-yyyy HH:mm:ss')}">03-Jul-2025 14:30:00</span></p>
+    </div>
+</div>
+</body>
+</html>
