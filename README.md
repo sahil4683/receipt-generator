@@ -45,6 +45,14 @@ A Spring Boot 3.0 based full-stack application for managing rent or utility rece
 
 ## 📄 Usage
 
+```bash
+http://localhost:8088/receipts-ui
+
+http://localhost:8088/receipts-master
+
+http://localhost:8088/swagger-ui.html
+```
+
 ### Run the App
 
 ```bash
