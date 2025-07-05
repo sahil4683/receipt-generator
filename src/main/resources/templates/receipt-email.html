@@ -4,205 +4,397 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt - Payment Confirmation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #1f2937;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .email-container {
             max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            overflow: hidden;
         }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+
         .header {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
         .header h1 {
-            margin: 0;
-            font-size: 24px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
         }
-        .receipt-info {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #2ecc71;
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
         }
-        .receipt-info h2 {
-            color: #2ecc71;
-            margin-top: 0;
+
+        .content {
+            padding: 40px 30px;
         }
+
+        .receipt-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 6px solid #10b981;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .receipt-card h2 {
+            color: #10b981;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
         .info-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
         }
+
         .info-row:last-child {
             border-bottom: none;
         }
+
+        .info-row:hover {
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 8px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
         .info-label {
-            font-weight: bold;
-            color: #666;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.95rem;
         }
+
         .info-value {
-            color: #333;
+            color: #1f2937;
+            font-weight: 500;
+            text-align: right;
         }
+
         .amount-highlight {
-            background-color: #e8f5e8;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 20px 0;
-            border: 2px solid #2ecc71;
-        }
-        .amount-highlight .amount {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2ecc71;
-        }
-        .message {
-            background-color: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #007bff;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #666;
-            font-size: 14px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #2ecc71;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 10px 0;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
         }
+
+        .amount-highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .amount-highlight .amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .amount-highlight .amount-in-words {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .payment-details {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 6px solid #6366f1;
+        }
+
+        .payment-details h2 {
+            color: #6366f1;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .message-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 25px;
+            border-radius: 16px;
+            margin: 30px 0;
+            border-left: 6px solid #3b82f6;
+        }
+
+        .message-box h3 {
+            color: #1e40af;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .message-box p {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
         .attachment-notice {
-            background-color: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #ffc107;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 25px;
+            border-radius: 16px;
+            margin: 30px 0;
+            border-left: 6px solid #f59e0b;
         }
-        .attachment-notice i {
-            color: #856404;
+
+        .attachment-notice h3 {
+            color: #92400e;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+
+        .attachment-notice p {
+            color: #78350f;
+            line-height: 1.7;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer .apartment-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .footer .disclaimer {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .footer .timestamp {
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        .icon {
+            font-size: 1.2em;
+        }
+
         @media (max-width: 600px) {
             body {
                 padding: 10px;
             }
-            .container {
-                padding: 20px;
+            
+            .email-container {
+                border-radius: 16px;
             }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .info-row {
                 flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
             }
-            .info-label {
-                margin-bottom: 5px;
+            
+            .info-value {
+                text-align: left;
+            }
+            
+            .amount-highlight .amount {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>🧾 Payment Receipt</h1>
-        <p>Thank you for your payment</p>
-    </div>
+    <div class="email-container">
+        <div class="header">
+            <h1>🧾 Payment Receipt</h1>
+            <p>Thank you for your payment</p>
+        </div>
 
-    <div class="receipt-info">
-        <h2>Receipt Details</h2>
-        <div class="info-row">
-            <span class="info-label">Receipt Number:</span>
-            <span class="info-value" th:text="${receipt.receiptNo}">BR/105/25-26</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Receipt Date:</span>
-            <span class="info-value" th:text="${formattedDate}">02-Jul-2025</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Bill Number:</span>
-            <span class="info-value" th:text="${receipt.billNo}">IRA/105GAAP</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Owner Name:</span>
-            <span class="info-value" th:text="${receipt.ownerName}">C-Wing-504</span>
-        </div>
-        <div class="info-row" th:if="${receipt.tenantName != null and !receipt.tenantName.isEmpty()}">
-            <span class="info-label">Tenant Name:</span>
-            <span class="info-value" th:text="${receipt.tenantName}">-</span>
-        </div>
-        <div class="info-row" th:if="${receipt.towerNo != null and !receipt.towerNo.isEmpty()}">
-            <span class="info-label">Tower:</span>
-            <span class="info-value" th:text="${receipt.towerNo}">C-Wing</span>
-        </div>
-        <div class="info-row" th:if="${receipt.flatNo != null and !receipt.flatNo.isEmpty()}">
-            <span class="info-label">Flat Number:</span>
-            <span class="info-value" th:text="${receipt.flatNo}">504</span>
-        </div>
-    </div>
+        <div class="content">
+            <div class="receipt-card">
+                <h2><span class="icon">📋</span> Receipt Details</h2>
+                <div class="info-grid">
+                    <div class="info-row">
+                        <span class="info-label">Receipt Number:</span>
+                        <span class="info-value" th:text="${receipt.receiptNo}">BR/105/25-26</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Receipt Date:</span>
+                        <span class="info-value" th:text="${formattedDate}">02-Jul-2025</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Bill Number:</span>
+                        <span class="info-value" th:text="${receipt.billNo}">IRA/105GAAP</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Owner Name:</span>
+                        <span class="info-value" th:text="${receipt.ownerName}">C-Wing-504</span>
+                    </div>
+                    <div class="info-row" th:if="${receipt.tenantName != null and !receipt.tenantName.isEmpty()}">
+                        <span class="info-label">Tenant Name:</span>
+                        <span class="info-value" th:text="${receipt.tenantName}">-</span>
+                    </div>
+                    <div class="info-row" th:if="${receipt.towerNo != null and !receipt.towerNo.isEmpty()}">
+                        <span class="info-label">Tower:</span>
+                        <span class="info-value" th:text="${receipt.towerNo}">C-Wing</span>
+                    </div>
+                    <div class="info-row" th:if="${receipt.flatNo != null and !receipt.flatNo.isEmpty()}">
+                        <span class="info-label">Flat Number:</span>
+                        <span class="info-value" th:text="${receipt.flatNo}">504</span>
+                    </div>
+                </div>
+            </div>
 
-    <div class="amount-highlight">
-        <div class="amount" th:text="${formattedAmount}">₹2,195.00</div>
-        <div th:text="${receipt.amountInWords}">Two Thousand One Hundred Ninety Five Rupees Only</div>
-    </div>
+            <div class="amount-highlight">
+                <div class="amount" th:text="${formattedAmount}">₹2,195.00</div>
+                <div class="amount-in-words" th:text="${receipt.amountInWords}">Two Thousand One Hundred Ninety Five Rupees Only</div>
+            </div>
 
-    <div class="receipt-info">
-        <h2>Payment Details</h2>
-        <div class="info-row">
-            <span class="info-label">Payment Method:</span>
-            <span class="info-value" th:text="${receipt.paymentMethod != null ? receipt.paymentMethod : 'CHEQUE'}">CHEQUE</span>
-        </div>
-        <div class="info-row" th:if="${receipt.transactionId != null and !receipt.transactionId.isEmpty()}">
-            <span class="info-label">Transaction ID:</span>
-            <span class="info-value" th:text="${receipt.transactionId}">8a96bc8397ca1e0...</span>
-        </div>
-        <div class="info-row" th:if="${receipt.billPeriod != null and !receipt.billPeriod.isEmpty()}">
-            <span class="info-label">Bill Period:</span>
-            <span class="info-value" th:text="${receipt.billPeriod}">July 2025</span>
-        </div>
-        <div class="info-row" th:if="${receipt.description != null and !receipt.description.isEmpty()}">
-            <span class="info-label">Description:</span>
-            <span class="info-value" th:text="${receipt.description}">Maintenance Charges</span>
-        </div>
-    </div>
+            <div class="payment-details">
+                <h2><span class="icon">💳</span> Payment Details</h2>
+                <div class="info-grid">
+                    <div class="info-row">
+                        <span class="info-label">Payment Method:</span>
+                        <span class="info-value" th:text="${receipt.paymentMethod != null ? receipt.paymentMethod : 'CHEQUE'}">CHEQUE</span>
+                    </div>
+                    <div class="info-row" th:if="${receipt.transactionId != null and !receipt.transactionId.isEmpty()}">
+                        <span class="info-label">Transaction ID:</span>
+                        <span class="info-value" th:text="${receipt.transactionId}">8a96bc8397ca1e0...</span>
+                    </div>
+                    <div class="info-row" th:if="${receipt.billPeriod != null and !receipt.billPeriod.isEmpty()}">
+                        <span class="info-label">Bill Period:</span>
+                        <span class="info-value" th:text="${receipt.billPeriod}">July 2025</span>
+                    </div>
+                    <div class="info-row" th:if="${receipt.description != null and !receipt.description.isEmpty()}">
+                        <span class="info-label">Description:</span>
+                        <span class="info-value" th:text="${receipt.description}">Maintenance Charges</span>
+                    </div>
+                </div>
+            </div>
 
-    <div class="message">
-        <h3>📧 Important Information</h3>
-        <p>This is a system-generated receipt for your payment. Please keep this email and the attached PDF for your records.</p>
-        <p>If you have any questions regarding this receipt, please contact the management office.</p>
-    </div>
+            <div class="message-box">
+                <h3><span class="icon">📧</span> Important Information</h3>
+                <p>This is a system-generated receipt for your payment. Please keep this email and the attached PDF for your records.</p>
+                <p>If you have any questions regarding this receipt, please contact the management office.</p>
+            </div>
 
-    <div class="attachment-notice">
-        <h3>📎 Attachment</h3>
-        <p>Your detailed receipt is attached as a PDF file. Please download and save it for your records.</p>
-    </div>
+            <div class="attachment-notice">
+                <h3><span class="icon">📎</span> Attachment</h3>
+                <p>Your detailed receipt is attached as a PDF file. Please download and save it for your records.</p>
+            </div>
+        </div>
 
-    <div class="footer">
-        <p><strong th:text="${receipt.apartmentName != null ? receipt.apartmentName : 'IRA GALAXY APARTMENT'}">IRA GALAXY APARTMENT</strong></p>
-        <p>This is an automated email. Please do not reply to this email.</p>
-        <p>Generated on <span th:text="${#temporals.format(#temporals.createNow(), 'dd-MMM-yyyy HH:mm:ss')}">03-Jul-2025 14:30:00</span></p>
+        <div class="footer">
+            <div class="apartment-name" th:text="${receipt.apartmentName != null ? receipt.apartmentName : 'IRA GALAXY APARTMENT'}">IRA GALAXY APARTMENT</div>
+            <div class="disclaimer">This is an automated email. Please do not reply to this email.</div>
+            <div class="timestamp">Generated on <span th:text="${#temporals.format(#temporals.createNow(), 'dd-MMM-yyyy HH:mm:ss')}">03-Jul-2025 14:30:00</span></div>
+        </div>
     </div>
-</div>
 </body>
 </html>
